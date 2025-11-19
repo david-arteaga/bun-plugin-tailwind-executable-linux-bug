@@ -37,7 +37,7 @@ RUN bun install --frozen-lockfile
 # Copy source needed for webapp build
 COPY . .
 
-RUN bun run build:browser && bun run build:executable
+RUN bun run build
 
 # Production image
 FROM base AS release
@@ -45,6 +45,7 @@ WORKDIR /app
 
 COPY --from=build /app/server ./
 COPY --from=build /app/dist ./
+COPY --from=build /app/dist-ssr ./
 
 USER bun
 

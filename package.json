@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "bun --hot src/index.tsx",
     "start": "NODE_ENV=production bun src/index.tsx",
-    "build:browser": "bun run build.ts",
-    "build:executable": "bun run build.executable.ts"
+    "build": "NODE_ENV=production bun run build:browser && bun run build:ssr && bun run build:executable",
+    "build:browser": "bun run scripts/build/build.browser.ts",
+    "build:ssr": "NODE_ENV=production bun run scripts/build/build.bun-ssr.ts",
+    "build:executable": "bun run scripts/build/build.executable.ts"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.7",
@@ -16,10 +18,13 @@
     "bun-plugin-tailwind": "^0.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "es-module-lexer": "^1.7.0",
     "lucide-react": "^0.545.0",
+    "p-limit": "^7.2.0",
     "react": "^19",
     "react-dom": "^19",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "3"
   },
   "devDependencies": {
     "@types/react": "^19",

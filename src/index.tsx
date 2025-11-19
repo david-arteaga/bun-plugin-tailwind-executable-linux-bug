@@ -1,21 +1,25 @@
 import { serve } from 'bun';
+import { join } from 'node:path';
+import { bunSsrRoutesConfig } from './bun-ssr-route-config';
+import {
+  generateSsrBundleHandlers,
+  SSR_PROD_BUNDLE_DIR_PATH,
+} from './bun-ssr/bundling';
+import { Environment } from './environment';
+import { generateSsrBundle } from './generate-ssr-bundle';
 import index from './index.html';
-import { renderToReadableStream } from 'react-dom/server';
-import { SSR } from './ssr';
+
+// don't bundle SSR in production since it should already be bundled
+const SHOULD_GENERATE_SSR_BUNDLE = !Environment.isProduction();
+
+const ssrBundleHandlers = await loadSsrBundleHandlers();
 
 const server = serve({
   routes: {
     // Serve index.html for all unmatched routes.
     '/*': index,
 
-    '/ssr': async (req) => {
-      const stream = await renderToReadableStream(<SSR />);
-      return new Response(stream, {
-        headers: {
-          'Content-Type': 'text/html',
-        },
-      });
-    },
+    ...ssrBundleHandlers.routeHandlers,
 
     '/api/hello': {
       async GET(req) {
@@ -50,3 +54,35 @@ const server = serve({
 });
 
 console.log(`🚀 Server running at ${server.url}`);
+
+async function loadSsrBundleHandlers() {
+  console.log('Loading SSR bundle handlers...');
+
+  const start = performance.now();
+
+  const bundleDirPath = SHOULD_GENERATE_SSR_BUNDLE
+    ? await generateSsrBundle()
+    : join(process.cwd(), SSR_PROD_BUNDLE_DIR_PATH);
+
+  console.log('Bundle dir path:', bundleDirPath);
+
+  const ssrBundleHandlers = await generateSsrBundleHandlers({
+    bundleDirPath,
+
+    compressSsrResponse: true,
+
+    routes: bunSsrRoutesConfig,
+  });
+
+  const end = performance.now();
+  console.log(`✅ SSR bundles loaded in ${(end - start).toFixed(2)}ms`);
+
+  if (Environment.isDev()) {
+    console.log(
+      'SSR bundle route handler paths:',
+      Object.keys(ssrBundleHandlers.routeHandlers)
+    );
+  }
+
+  return ssrBundleHandlers;
+}
