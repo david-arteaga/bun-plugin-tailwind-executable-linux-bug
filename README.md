@@ -1,3 +1,10 @@
+## Summary
+
+This repo is a minimal reproduction of a bug I'm seeing with bun-plugin-tailwind when building a single-file executable and running it within a Docker container.
+The bug is not present when the single-file executable is run directly on a host machine (I've tested both linux-x86 annd mac-arm64 targets).
+
+The bug shows up when `'bun-plugin-tailwind'` is imported anywhere in the project.
+
 ### To Repro
 
 - `docker build . --platform=linux/amd64 -t bun-plugin-tailwind-executable-linux-bug`
