@@ -5,6 +5,8 @@ The bug is not present when the single-file executable is run directly on a host
 
 The bug shows up when `'bun-plugin-tailwind'` is imported anywhere in the project.
 
+I ran into this bug when setting up react SSR with Bun. A full setup is available in the `full-ssr-repro` branch (which actually also contains a couple of other issues I'm seeing with the Bun bundler).
+
 ### To Repro
 
 - `docker build . --platform=linux/amd64 -t bun-plugin-tailwind-executable-linux-bug`
